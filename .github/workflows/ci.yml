@@ -38,6 +38,8 @@ jobs:
         env:
           XDG_CACHE_HOME: .cache
       - run: npm run postinstall
+        env:
+          XDG_CACHE_HOME: .cache
       - run: npm test
       - name: Build
         run: node scripts/build.js
