@@ -43,6 +43,15 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           registry-url: 'https://registry.npmjs.org'
+      - name: Cache ripgrep binary
+        id: cache-ripgrep
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-ripgrep
+        with:
+          path: |
+            .cache
+          key: ${{ runner.os }}-build-${{ env.cache-name }}
       - uses: actions/cache@v3
         id: npm-cache
         with:
@@ -52,6 +61,9 @@ jobs:
       - name: npm ci
         run: npm ci
         if: steps.npm-cache.outputs.cache-hit != 'true'
+        env:
+          XDG_CACHE_HOME: .cache
+      - run: npm run postinstall
       - run: npm test
       - run: node scripts/build.js
       - run: npm publish --access public
