@@ -1,3 +1,3 @@
-import { downloadRipGrep } from "./downloadRipGrep.js";
+import { downloadRipGrep } from './downloadRipGrep.js'
 
-downloadRipGrep();
+downloadRipGrep()
