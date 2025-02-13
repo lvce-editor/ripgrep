@@ -5,15 +5,14 @@ import fsExtra from 'fs-extra'
 import got from 'got'
 import * as os from 'node:os'
 import { dirname, join } from 'node:path'
-import { pathExists } from 'path-exists'
 import { pipeline } from 'node:stream/promises'
+import { pathExists } from 'path-exists'
 import { temporaryFile } from 'tempy'
-import { fileURLToPath } from 'node:url'
 import { xdgCache } from 'xdg-basedir'
 
 const { mkdir, createWriteStream, move } = fsExtra
 
-const __dirname = dirname(fileURLToPath(import.meta.url))
+const __dirname = import.meta.dirname
 
 const REPOSITORY = `microsoft/ripgrep-prebuilt`
 const VERSION = process.env.RIPGREP_VERSION || 'v13.0.0-10'
