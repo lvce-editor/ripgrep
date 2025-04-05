@@ -26,7 +26,7 @@
     "execa": "^9.5.2",
     "extract-zip": "^2.0.1",
     "fs-extra": "^11.3.0",
-    "got": "^14.4.6",
+    "got": "^14.4.7",
     "path-exists": "^5.0.0",
     "tempy": "^3.1.0",
     "xdg-basedir": "^5.1.0"
@@ -35,11 +35,11 @@
     "@lvce-editor/eslint-config": "^1.36.0",
     "@types/fs-extra": "^11.0.4",
     "@types/jest": "^29.5.14",
-    "@types/node": "^22.13.14",
-    "eslint": "^9.23.0",
+    "@types/node": "^22.14.0",
+    "eslint": "^9.24.0",
     "jest": "^30.0.0-alpha.7",
     "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.3"
   },
   "prettier": {
     "semi": false,
