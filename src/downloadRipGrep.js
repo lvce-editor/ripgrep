@@ -6,13 +6,14 @@ import got from 'got'
 import * as os from 'node:os'
 import { dirname, join } from 'node:path'
 import { pipeline } from 'node:stream/promises'
+import { fileURLToPath } from 'node:url'
 import { pathExists } from 'path-exists'
 import { temporaryFile } from 'tempy'
 import { xdgCache } from 'xdg-basedir'
 
 const { mkdir, createWriteStream, move } = fsExtra
 
-const __dirname = import.meta.dirname
+const __dirname = dirname(fileURLToPath(import.meta.url))
 
 const REPOSITORY = `microsoft/ripgrep-prebuilt`
 const VERSION = process.env.RIPGREP_VERSION || 'v13.0.0-10'
