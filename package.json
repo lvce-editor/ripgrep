@@ -23,7 +23,7 @@
   "license": "MIT",
   "dependencies": {
     "@lvce-editor/verror": "^1.6.0",
-    "execa": "^9.5.3",
+    "execa": "^9.6.0",
     "extract-zip": "^2.0.1",
     "fs-extra": "^11.3.0",
     "got": "^14.4.7",
@@ -32,11 +32,11 @@
     "xdg-basedir": "^5.1.0"
   },
   "devDependencies": {
-    "@lvce-editor/eslint-config": "^1.43.0",
+    "@lvce-editor/eslint-config": "^1.48.0",
     "@types/fs-extra": "^11.0.4",
     "@types/jest": "^29.5.14",
-    "@types/node": "^22.15.18",
-    "eslint": "^9.27.0",
+    "@types/node": "^22.15.29",
+    "eslint": "^9.28.0",
     "jest": "^30.0.0-alpha.7",
     "prettier": "^3.5.3",
     "typescript": "^5.8.3"
