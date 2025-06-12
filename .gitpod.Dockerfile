@@ -2,7 +2,7 @@ FROM gitpod/workspace-full-vnc
 
 # Install NodeJS
 RUN bash -c ". .nvm/nvm.sh \
-    && nvm install 22.13.1 \
+    && nvm install 22.16.0 \
     && nvm use 22.13.1 \
     && nvm alias default 22.13.1"
 
