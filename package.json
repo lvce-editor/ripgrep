@@ -32,11 +32,11 @@
     "xdg-basedir": "^5.1.0"
   },
   "devDependencies": {
-    "@lvce-editor/eslint-config": "^1.51.0",
+    "@lvce-editor/eslint-config": "^1.52.0",
     "@types/fs-extra": "^11.0.4",
     "@types/jest": "^30.0.0",
-    "@types/node": "^24.0.4",
-    "eslint": "^9.29.0",
+    "@types/node": "^24.0.7",
+    "eslint": "^9.30.0",
     "jest": "^30.0.3",
     "prettier": "^3.6.2",
     "typescript": "^5.8.3"
