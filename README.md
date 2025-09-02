@@ -13,7 +13,7 @@ $ npm install @lvce-editor/ripgrep
 ## Usage
 
 ```js
-import { rgPath } = from "@lvce-editor/ripgrep"
+import { rgPath } from "@lvce-editor/ripgrep"
 import { spawn } from 'node:child_process'
 
 const childProcess = spawn(rgPath, ["abc", "."], {
