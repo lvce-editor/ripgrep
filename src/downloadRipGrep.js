@@ -98,6 +98,15 @@ const untarGz = async (inFile, outDir) => {
 }
 
 export const downloadRipGrep = async (overrideBinPath) => {
+  const platform = process.env.platform || os.platform()
+  if (platform === 'android') {
+    try {
+      await execa('pkg', ['install', 'ripgrep', '-y'])
+      return
+    } catch (error) {
+      console.info('Could not install ripgrep via pkg. Falling back to download.')
+    }
+  }
   const target = getTarget()
   const url = `https://github.com/${REPOSITORY}/releases/download/${VERSION}/ripgrep-${VERSION}-${target}`
   const downloadPath = `${xdgCache}/vscode-ripgrep/ripgrep-${VERSION}-${target}`
