@@ -97,14 +97,26 @@ const untarGz = async (inFile, outDir) => {
   }
 }
 
-export const downloadRipGrep = async (overrideBinPath) => {
-  const platform = process.env.platform || os.platform()
+const downloadRipGrepAndroid = async (platform) => {
   if (platform === 'android') {
     try {
       await execa('pkg', ['install', 'ripgrep', '-y'])
-      return
+      return true
     } catch (error) {
-      console.info('Could not install ripgrep via pkg. Falling back to download.')
+      console.info(
+        'Could not install ripgrep via pkg. Falling back to download.',
+      )
+      return false
+    }
+  }
+}
+
+export const downloadRipGrep = async (overrideBinPath) => {
+  const platform = process.env.platform || os.platform()
+  if (platform === 'android') {
+    const didInstall = await downloadRipGrepAndroid(platform)
+    if (didInstall) {
+      return
     }
   }
   const target = getTarget()
