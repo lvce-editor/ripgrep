@@ -120,7 +120,8 @@ export const downloadRipGrep = async (overrideBinPath) => {
     }
   }
   const target = getTarget()
-  const url = `https://github.com/${REPOSITORY}/releases/download/${VERSION}/ripgrep-${VERSION}-${target}`
+  const baseUrl = process.env.RIPGREP_PREBUILT_BINARIES_MIRROR || `https://github.com/${REPOSITORY}/releases/download`
+  const url = `${baseUrl}/${VERSION}/ripgrep-${VERSION}-${target}`
   const downloadPath = `${xdgCache}/vscode-ripgrep/ripgrep-${VERSION}-${target}`
   const binPath = overrideBinPath ?? BIN_PATH
   if (!(await pathExists(downloadPath))) {

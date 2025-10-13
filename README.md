@@ -21,6 +21,13 @@ const childProcess = spawn(rgPath, ["abc", "."], {
 });
 ```
 
+## Environment Variables
+
+- `RIPGREP_PREBUILT_BINARIES_MIRROR`: Specify a custom mirror URL for downloading ripgrep prebuilt binaries. This is useful for users in regions where GitHub releases are slow or inaccessible, or for organizations using internal mirrors.
+  - **Default**: `https://github.com/microsoft/ripgrep-prebuilt/releases/download`
+  - **Example**: `export RIPGREP_PREBUILT_BINARIES_MIRROR=https://your-mirror.com/ripgrep-prebuilt/releases/download`
+  - **Note**: The mirror URL should follow the same path structure as the official repository, with binaries available at `{mirror-url}/{version}/ripgrep-{version}-{target}`
+
 ## Gitpod
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io#https://github.com/lvce-editor/ripgrep)
