@@ -20,11 +20,6 @@ const mockExtractZip = jest.fn()
 // Mock tempy
 const mockTemporaryFile = jest.fn()
 
-// Mock pipeline
-const mockPipeline = jest.fn()
-
-
-
 // Mock xdg-basedir
 jest.unstable_mockModule('xdg-basedir', () => ({
   xdgCache: '/mock/cache',
@@ -68,20 +63,10 @@ jest.unstable_mockModule('node:os', () => ({
   arch: () => 'x64',
 }))
 
-jest.unstable_mockModule('node:stream/promises', () => ({
-  default: {
-    pipeline: mockPipeline,
-    finished: jest.fn(),
-  },
-  pipeline: mockPipeline,
-  finished: jest.fn(),
-}))
-
-
-
-
 // Import the modules after mocking
-const { downloadRipGrep, downloadFile } = await import('../src/downloadRipGrep.js')
+const { downloadRipGrep, downloadFile } = await import(
+  '../src/downloadRipGrep.js'
+)
 
 let mockServer
 let serverUrl
@@ -122,26 +107,26 @@ afterEach(() => {
 
 test('downloadRipGrep should handle HTTP 500 error', async () => {
   // Mock GitHub API to return 500 error
-  nock('https://github.com')
-    .get('/microsoft/ripgrep-prebuilt/releases/download/v13.0.0-10/ripgrep-v13.0.0-10-x86_64-unknown-linux-musl.tar.gz')
+  const scope = nock('https://github.com')
+    .get(
+      '/microsoft/ripgrep-prebuilt/releases/download/v13.0.0-10/ripgrep-v13.0.0-10-x86_64-unknown-linux-musl.tar.gz',
+    )
     .reply(500, 'Internal Server Error')
 
   // Mock file system operations
   // @ts-ignore
   mockFs.pathExists.mockResolvedValue(false)
   mockTemporaryFile.mockReturnValue('/tmp/mock-temp-file')
-  // @ts-ignore
-  mockPipeline.mockRejectedValue(new Error('HTTP 500'))
-
 
   await expect(downloadRipGrep()).rejects.toThrow('Failed to download')
-
 })
 
 test('downloadRipGrep should successfully download and extract file', async () => {
   // Mock GitHub API to return successful response
-  nock('https://github.com')
-    .get('/microsoft/ripgrep-prebuilt/releases/download/v13.0.0-10/ripgrep-v13.0.0-10-x86_64-unknown-linux-musl.tar.gz')
+  const scope = nock('https://github.com')
+    .get(
+      '/microsoft/ripgrep-prebuilt/releases/download/v13.0.0-10/ripgrep-v13.0.0-10-x86_64-unknown-linux-musl.tar.gz',
+    )
     .reply(200, 'mock-tar-gz-content', {
       'Content-Type': 'application/gzip',
       'Content-Length': '18',
@@ -162,41 +147,43 @@ test('downloadRipGrep should successfully download and extract file', async () =
     destroy: jest.fn(),
   })
   // @ts-ignore
-  mockPipeline.mockResolvedValue(undefined)
-  // @ts-ignore
   mockFs.mkdir.mockResolvedValue(undefined)
   // @ts-ignore
   mockFs.move.mockResolvedValue(undefined)
   // @ts-ignore
   mockExeca.mockResolvedValue({ stdout: '', stderr: '' })
 
-
   await downloadRipGrep()
 
   // Verify that directories were created
   expect(mockFs.mkdir).toHaveBeenCalledWith(
     expect.stringContaining('/mock/cache/vscode-ripgrep'),
-    { recursive: true }
+    { recursive: true },
   )
-  expect(mockFs.mkdir).toHaveBeenCalledWith(
-    expect.stringContaining('/bin'),
-    { recursive: true }
-  )
+  expect(mockFs.mkdir).toHaveBeenCalledWith(expect.stringContaining('/bin'), {
+    recursive: true,
+  })
 
   // Verify that the file was moved to cache
   expect(mockFs.move).toHaveBeenCalledWith(
     '/tmp/mock-temp-file',
-    expect.stringContaining('/mock/cache/vscode-ripgrep/ripgrep-v13.0.0-10-x86_64-unknown-linux-musl.tar.gz')
+    expect.stringContaining(
+      '/mock/cache/vscode-ripgrep/ripgrep-v13.0.0-10-x86_64-unknown-linux-musl.tar.gz',
+    ),
   )
 
   // Verify that tar extraction was called
   expect(mockExeca).toHaveBeenCalledWith('tar', [
     'xvf',
-    expect.stringContaining('/mock/cache/vscode-ripgrep/ripgrep-v13.0.0-10-x86_64-unknown-linux-musl.tar.gz'),
+    expect.stringContaining(
+      '/mock/cache/vscode-ripgrep/ripgrep-v13.0.0-10-x86_64-unknown-linux-musl.tar.gz',
+    ),
     '-C',
-    expect.stringContaining('/bin')
+    expect.stringContaining('/bin'),
   ])
 
+  // Clean up nock scope
+  scope.done()
 })
 
 test('downloadRipGrep should use cached file when it exists', async () => {
@@ -206,7 +193,6 @@ test('downloadRipGrep should use cached file when it exists', async () => {
   // @ts-ignore
   mockExeca.mockResolvedValue({ stdout: '', stderr: '' })
 
-
   // Mock console.info to capture the cache message
   const consoleSpy = jest.spyOn(console, 'info').mockImplementation(() => {})
 
@@ -214,15 +200,17 @@ test('downloadRipGrep should use cached file when it exists', async () => {
 
   // Verify that the cached file message was logged
   expect(consoleSpy).toHaveBeenCalledWith(
-    expect.stringContaining('has been cached')
+    expect.stringContaining('has been cached'),
   )
 
   // Verify that tar extraction was still called
   expect(mockExeca).toHaveBeenCalledWith('tar', [
     'xvf',
-    expect.stringContaining('/mock/cache/vscode-ripgrep/ripgrep-v13.0.0-10-x86_64-unknown-linux-musl.tar.gz'),
+    expect.stringContaining(
+      '/mock/cache/vscode-ripgrep/ripgrep-v13.0.0-10-x86_64-unknown-linux-musl.tar.gz',
+    ),
     '-C',
-    expect.stringContaining('/bin')
+    expect.stringContaining('/bin'),
   ])
 
   consoleSpy.mockRestore()
@@ -230,14 +218,22 @@ test('downloadRipGrep should use cached file when it exists', async () => {
 
 test('downloadFile should handle download errors', async () => {
   // Mock GitHub API to return 404 error
-  nock('https://github.com')
-    .get('/microsoft/ripgrep-prebuilt/releases/download/v13.0.0-10/ripgrep-v13.0.0-10-x86_64-unknown-linux-musl.tar.gz')
+  const scope = nock('https://github.com')
+    .get(
+      '/microsoft/ripgrep-prebuilt/releases/download/v13.0.0-10/ripgrep-v13.0.0-10-x86_64-unknown-linux-musl.tar.gz',
+    )
     .reply(404, 'Not Found')
 
   // Mock file system operations
   mockTemporaryFile.mockReturnValue('/tmp/mock-temp-file')
-  // @ts-ignore
-  mockPipeline.mockRejectedValue(new Error('HTTP 404'))
 
-  await expect(downloadFile('https://github.com/microsoft/ripgrep-prebuilt/releases/download/v13.0.0-10/ripgrep-v13.0.0-10-x86_64-unknown-linux-musl.tar.gz', '/tmp/test.tar.gz')).rejects.toThrow('Failed to download')
+  await expect(
+    downloadFile(
+      'https://github.com/microsoft/ripgrep-prebuilt/releases/download/v13.0.0-10/ripgrep-v13.0.0-10-x86_64-unknown-linux-musl.tar.gz',
+      '/tmp/test.tar.gz',
+    ),
+  ).rejects.toThrow('Failed to download')
+
+  // Clean up nock scope
+  scope.done()
 })
