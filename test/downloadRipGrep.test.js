@@ -6,7 +6,6 @@ import * as os from 'node:os'
 // Mock fs operations
 const mockFs = {
   mkdir: jest.fn(),
-  createWriteStream: jest.fn(),
   move: jest.fn(),
   pathExists: jest.fn(),
 }
@@ -29,11 +28,9 @@ jest.unstable_mockModule('xdg-basedir', () => ({
 jest.unstable_mockModule('fs-extra', () => ({
   default: {
     mkdir: mockFs.mkdir,
-    createWriteStream: mockFs.createWriteStream,
     move: mockFs.move,
   },
   mkdir: mockFs.mkdir,
-  createWriteStream: mockFs.createWriteStream,
   move: mockFs.move,
 }))
 
@@ -107,10 +104,8 @@ afterEach(() => {
 
 test('downloadRipGrep should handle HTTP 500 error', async () => {
   // Mock GitHub API to return 500 error
-  const scope = nock('https://github.com')
-    .get(
-      '/microsoft/ripgrep-prebuilt/releases/download/v13.0.0-10/ripgrep-v13.0.0-10-x86_64-unknown-linux-musl.tar.gz',
-    )
+  const scope = nock('https://release-assets.githubusercontent.com')
+    .get(/.*ripgrep-v13\.0\.0-10-x86_64-unknown-linux-musl\.tar\.gz.*/)
     .reply(500, 'Internal Server Error')
 
   // Mock file system operations
@@ -123,10 +118,8 @@ test('downloadRipGrep should handle HTTP 500 error', async () => {
 
 test('downloadRipGrep should successfully download and extract file', async () => {
   // Mock GitHub API to return successful response
-  const scope = nock('https://github.com')
-    .get(
-      '/microsoft/ripgrep-prebuilt/releases/download/v13.0.0-10/ripgrep-v13.0.0-10-x86_64-unknown-linux-musl.tar.gz',
-    )
+  const scope = nock('https://release-assets.githubusercontent.com')
+    .get(/.*ripgrep-v13\.0\.0-10-x86_64-unknown-linux-musl\.tar\.gz.*/)
     .reply(200, 'mock-tar-gz-content', {
       'Content-Type': 'application/gzip',
       'Content-Length': '18',
@@ -136,16 +129,6 @@ test('downloadRipGrep should successfully download and extract file', async () =
   // @ts-ignore
   mockFs.pathExists.mockResolvedValue(false)
   mockTemporaryFile.mockReturnValue('/tmp/mock-temp-file')
-  mockFs.createWriteStream.mockReturnValue({
-    write: jest.fn(),
-    end: jest.fn(),
-    on: jest.fn(),
-    once: jest.fn(),
-    emit: jest.fn(),
-    pipe: jest.fn(),
-    unpipe: jest.fn(),
-    destroy: jest.fn(),
-  })
   // @ts-ignore
   mockFs.mkdir.mockResolvedValue(undefined)
   // @ts-ignore
@@ -218,10 +201,8 @@ test('downloadRipGrep should use cached file when it exists', async () => {
 
 test('downloadFile should handle download errors', async () => {
   // Mock GitHub API to return 404 error
-  const scope = nock('https://github.com')
-    .get(
-      '/microsoft/ripgrep-prebuilt/releases/download/v13.0.0-10/ripgrep-v13.0.0-10-x86_64-unknown-linux-musl.tar.gz',
-    )
+  const scope = nock('https://release-assets.githubusercontent.com')
+    .get(/.*ripgrep-v13\.0\.0-10-x86_64-unknown-linux-musl\.tar\.gz.*/)
     .reply(404, 'Not Found')
 
   // Mock file system operations
