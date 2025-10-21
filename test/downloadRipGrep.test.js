@@ -80,14 +80,17 @@ test('downloadRipGrep should successfully download and extract file', async () =
   await downloadRipGrep(tempBinDir)
 
   expect(scope.isDone()).toBe(true)
-  expect(mockExeca).toHaveBeenCalledWith('tar', [
-    'xvf',
-    expect.stringContaining(
+  expect(mockExeca).toHaveBeenCalled()
+  const tarArgs = /** @type {any[]} */ (mockExeca.mock.calls[0])[1]
+  const normalize = (p) => String(p).replace(/\\/g, '/')
+  expect(tarArgs[0]).toBe('xvf')
+  expect(normalize(tarArgs[1])).toContain(
+    normalize(
       `${tempCacheDir}/vscode-ripgrep/ripgrep-v13.0.0-10-x86_64-unknown-linux-musl.tar.gz`,
     ),
-    '-C',
-    tempBinDir,
-  ])
+  )
+  expect(tarArgs[2]).toBe('-C')
+  expect(normalize(tarArgs[3])).toBe(normalize(tempBinDir))
 })
 
 test('downloadRipGrep should use cached file when it exists', async () => {
@@ -108,12 +111,13 @@ test('downloadRipGrep should use cached file when it exists', async () => {
   expect(infoSpy).toHaveBeenCalledWith(
     expect.stringContaining('has been cached'),
   )
-  expect(mockExeca).toHaveBeenCalledWith('tar', [
-    'xvf',
-    cachedFile,
-    '-C',
-    tempBinDir,
-  ])
+  expect(mockExeca).toHaveBeenCalled()
+  const tarArgs = /** @type {any[]} */ (mockExeca.mock.calls[0])[1]
+  const normalize = (p) => String(p).replace(/\\/g, '/')
+  expect(tarArgs[0]).toBe('xvf')
+  expect(normalize(tarArgs[1])).toBe(normalize(cachedFile))
+  expect(tarArgs[2]).toBe('-C')
+  expect(normalize(tarArgs[3])).toBe(normalize(tempBinDir))
 
   infoSpy.mockRestore()
 })
