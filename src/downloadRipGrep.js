@@ -2,7 +2,6 @@ import { VError } from '@lvce-editor/verror'
 import { execa } from 'execa'
 import extractZip from 'extract-zip'
 import fsExtra from 'fs-extra'
-import got from 'got'
 import * as os from 'node:os'
 import { dirname, join } from 'node:path'
 import { pipeline } from 'node:stream/promises'
@@ -63,7 +62,11 @@ const getTarget = () => {
 export const downloadFile = async (url, outFile) => {
   try {
     const tmpFile = temporaryFile()
-    await pipeline(got.stream(url), createWriteStream(tmpFile))
+    const response = await fetch(url)
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+    }
+    await pipeline(response.body, createWriteStream(tmpFile))
     await mkdir(dirname(outFile), { recursive: true })
     await move(tmpFile, outFile)
   } catch (error) {

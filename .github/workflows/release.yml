@@ -5,6 +5,11 @@ on:
   push:
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+'
+
+permissions:
+  id-token: write # Required for OIDC
+  contents: write
+
 jobs:
   create-release:
     name: create-release
@@ -36,7 +41,7 @@ jobs:
       fail-fast: true
       max-parallel: 1
       matrix:
-        os: [windows-2022, macos-14, ubuntu-24.04]
+        os: [windows-2025, macos-26, ubuntu-24.04]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -72,8 +77,6 @@ jobs:
       - run: npm publish --access public
         if: matrix.os == 'ubuntu-24.04'
         working-directory: ./dist
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
       - name: Publish GitHub release
         if: matrix.os == 'ubuntu-24.04'
         env:

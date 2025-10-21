@@ -13,12 +13,12 @@ $ npm install @lvce-editor/ripgrep
 ## Usage
 
 ```js
-import { rgPath } from "@lvce-editor/ripgrep"
+import { rgPath } from '@lvce-editor/ripgrep'
 import { spawn } from 'node:child_process'
 
-const childProcess = spawn(rgPath, ["abc", "."], {
-  stdio: "inherit",
-});
+const childProcess = spawn(rgPath, ['abc', '.'], {
+  stdio: 'inherit',
+})
 ```
 
 ## Environment Variables
@@ -27,10 +27,6 @@ const childProcess = spawn(rgPath, ["abc", "."], {
   - **Default**: `https://github.com/microsoft/ripgrep-prebuilt/releases/download`
   - **Example**: `export RIPGREP_PREBUILT_BINARIES_MIRROR=https://your-mirror.com/ripgrep-prebuilt/releases/download`
   - **Note**: The mirror URL should follow the same path structure as the official repository, with binaries available at `{mirror-url}/{version}/ripgrep-{version}-{target}`
-
-## Gitpod
-
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io#https://github.com/lvce-editor/ripgrep)
 
 ## Credits
 
