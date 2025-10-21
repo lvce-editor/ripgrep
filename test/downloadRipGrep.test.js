@@ -6,6 +6,7 @@ import * as os from 'node:os'
 // Mock fs operations
 const mockFs = {
   mkdir: jest.fn(),
+  createWriteStream: jest.fn(),
   move: jest.fn(),
   pathExists: jest.fn(),
 }
@@ -28,9 +29,11 @@ jest.unstable_mockModule('xdg-basedir', () => ({
 jest.unstable_mockModule('fs-extra', () => ({
   default: {
     mkdir: mockFs.mkdir,
+    createWriteStream: mockFs.createWriteStream,
     move: mockFs.move,
   },
   mkdir: mockFs.mkdir,
+  createWriteStream: mockFs.createWriteStream,
   move: mockFs.move,
 }))
 
@@ -129,6 +132,16 @@ test('downloadRipGrep should successfully download and extract file', async () =
   // @ts-ignore
   mockFs.pathExists.mockResolvedValue(false)
   mockTemporaryFile.mockReturnValue('/tmp/mock-temp-file')
+  mockFs.createWriteStream.mockReturnValue({
+    write: jest.fn(),
+    end: jest.fn(),
+    on: jest.fn(),
+    once: jest.fn(),
+    emit: jest.fn(),
+    pipe: jest.fn(),
+    unpipe: jest.fn(),
+    destroy: jest.fn(),
+  })
   // @ts-ignore
   mockFs.mkdir.mockResolvedValue(undefined)
   // @ts-ignore
@@ -214,7 +227,4 @@ test('downloadFile should handle download errors', async () => {
       '/tmp/test.tar.gz',
     ),
   ).rejects.toThrow('Failed to download')
-
-  // Clean up nock scope
-  scope.done()
 })
