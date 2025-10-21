@@ -10,6 +10,7 @@
     "url": "https://github.com/lvce-editor/ripgrep"
   },
   "scripts": {
+    "build": "node scripts/build.js",
     "postinstall": "node ./src/postinstall.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
