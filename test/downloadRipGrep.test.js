@@ -1,194 +1,134 @@
-import { test, expect, beforeEach, afterEach, jest } from '@jest/globals'
+import {
+  test,
+  expect,
+  beforeAll,
+  afterAll,
+  beforeEach,
+  jest,
+} from '@jest/globals'
 import nock from 'nock'
-import { createServer } from 'node:http'
-import * as os from 'node:os'
 
-// Mock only pathExists
-const mockPathExists = jest.fn()
+// Use a real filesystem temp cache and mock only what must not run (tar)
+const { mkdtempSync, mkdirSync, writeFileSync } = await import('node:fs')
+const { join } = await import('node:path')
+const { tmpdir } = await import('node:os')
 
-// Mock execa
-const mockExeca = jest.fn()
+const tempCacheDir = mkdtempSync(join(tmpdir(), 'ripgrep-test-'))
+const tempBinDir = mkdtempSync(join(tmpdir(), 'ripgrep-bin-'))
 
-// Mock extract-zip
-const mockExtractZip = jest.fn()
+// Force predictable platform/arch for URL/target without mocking core 'os'
+const originalEnv = { ...process.env }
+process.env.platform = 'linux'
+process.env.npm_config_arch = 'x64'
 
-// Mock tempy
-const mockTemporaryFile = jest.fn()
-
-// Mock xdg-basedir
+// Provide cache location used by the implementation
 jest.unstable_mockModule('xdg-basedir', () => ({
-  xdgCache: '/mock/cache',
+  xdgCache: tempCacheDir,
 }))
 
-// Mock all the dependencies
-jest.unstable_mockModule('path-exists', () => ({
-  pathExists: mockPathExists,
-}))
-
+// Mock only tar execution
+const mockExeca = jest.fn()
 jest.unstable_mockModule('execa', () => ({
   execa: mockExeca,
 }))
 
-jest.unstable_mockModule('extract-zip', () => ({
-  default: mockExtractZip,
-  extractZip: mockExtractZip,
-}))
-
-jest.unstable_mockModule('tempy', () => ({
-  temporaryFile: mockTemporaryFile,
-}))
-
-jest.unstable_mockModule('node:os', () => ({
-  default: {
-    platform: () => 'linux',
-    arch: () => 'x64',
-  },
-  platform: () => 'linux',
-  arch: () => 'x64',
-}))
-
-// Import the modules after mocking
+// Import after mocks
 const { downloadRipGrep, downloadFile } = await import(
   '../src/downloadRipGrep.js'
 )
 
-let mockServer
-let serverUrl
+beforeAll(() => {
+  nock.disableNetConnect()
+})
+
+afterAll(() => {
+  nock.enableNetConnect()
+  process.env = originalEnv
+})
 
 beforeEach(() => {
-  // Reset all mocks
   jest.clearAllMocks()
-
-  // Create a mock HTTP server
-  mockServer = createServer((req, res) => {
-    if (req.url === '/test-file.tar.gz') {
-      res.writeHead(200, { 'Content-Type': 'application/gzip' })
-      res.end('mock-tar-gz-content')
-    } else if (req.url === '/error') {
-      res.writeHead(500, { 'Content-Type': 'text/plain' })
-      res.end('Internal Server Error')
-    } else {
-      res.writeHead(404, { 'Content-Type': 'text/plain' })
-      res.end('Not Found')
-    }
-  })
-
-  const { promise, resolve } = Promise.withResolvers()
-  mockServer.listen(0, () => {
-    const port = mockServer.address().port
-    serverUrl = `http://localhost:${port}`
-    resolve()
-  })
-  return promise
-})
-
-afterEach(() => {
   nock.cleanAll()
-  if (mockServer) {
-    mockServer.close()
-  }
 })
 
-test('downloadRipGrep should handle HTTP 500 error', async () => {
-  // Mock GitHub API to return 500 error
+test('downloadRipGrep should handle network error', async () => {
+  // Simulate a network failure so pipeline rejects
   nock('https://github.com')
     .get(
       '/microsoft/ripgrep-prebuilt/releases/download/v13.0.0-10/ripgrep-v13.0.0-10-x86_64-unknown-linux-musl.tar.gz',
     )
-    .reply(500, 'Internal Server Error')
+    .replyWithError('simulated error')
 
-  // Mock file system operations
-  // @ts-ignore
-  mockPathExists.mockResolvedValue(false)
-  mockTemporaryFile.mockReturnValue('/tmp/mock-temp-file')
-
-  await expect(downloadRipGrep()).rejects.toThrow('Failed to download')
+  await expect(downloadRipGrep(tempBinDir)).rejects.toThrow(
+    'Failed to download',
+  )
 })
 
 test('downloadRipGrep should successfully download and extract file', async () => {
-  // Mock GitHub API to return successful response
+  // Intercept the GitHub asset request with a simple 200 body
   const scope = nock('https://github.com')
-    .get(/.*ripgrep-v13\.0\.0-10-x86_64-unknown-linux-musl\.tar\.gz.*/)
+    .get(
+      '/microsoft/ripgrep-prebuilt/releases/download/v13.0.0-10/ripgrep-v13.0.0-10-x86_64-unknown-linux-musl.tar.gz',
+    )
     .reply(200, 'mock-tar-gz-content', {
       'Content-Type': 'application/gzip',
-      'Content-Length': '18',
     })
 
-  // Mock file system operations
-  // @ts-ignore
-  mockPathExists.mockResolvedValue(false)
-  mockTemporaryFile.mockReturnValue('/tmp/mock-temp-file')
-  // @ts-ignore
   mockExeca.mockResolvedValue({ stdout: '', stderr: '' })
 
-  try {
-    await downloadRipGrep()
-  } catch (error) {
-    console.log('Error:', error.message)
-    console.log('Nock pending mocks:', nock.pendingMocks())
-    console.log('Nock active mocks:', nock.activeMocks())
-    throw error
-  }
+  await downloadRipGrep(tempBinDir)
 
-  // Verify that the request was intercepted
   expect(scope.isDone()).toBe(true)
-
-  // Verify that tar extraction was called
   expect(mockExeca).toHaveBeenCalledWith('tar', [
     'xvf',
     expect.stringContaining(
-      '/mock/cache/vscode-ripgrep/ripgrep-v13.0.0-10-x86_64-unknown-linux-musl.tar.gz',
+      `${tempCacheDir}/vscode-ripgrep/ripgrep-v13.0.0-10-x86_64-unknown-linux-musl.tar.gz`,
     ),
     '-C',
-    expect.stringContaining('/bin'),
+    tempBinDir,
   ])
 })
 
 test('downloadRipGrep should use cached file when it exists', async () => {
-  // Mock file system operations - file already exists
-  // @ts-ignore
-  mockPathExists.mockResolvedValue(true)
-  // @ts-ignore
+  // Prepare a cached file on disk
+  const cachedDir = join(tempCacheDir, 'vscode-ripgrep')
+  mkdirSync(cachedDir, { recursive: true })
+  const cachedFile = join(
+    cachedDir,
+    'ripgrep-v13.0.0-10-x86_64-unknown-linux-musl.tar.gz',
+  )
+  writeFileSync(cachedFile, 'already-downloaded')
+
   mockExeca.mockResolvedValue({ stdout: '', stderr: '' })
+  const infoSpy = jest.spyOn(console, 'info').mockImplementation(() => {})
 
-  // Mock console.info to capture the cache message
-  const consoleSpy = jest.spyOn(console, 'info').mockImplementation(() => {})
+  await downloadRipGrep(tempBinDir)
 
-  await downloadRipGrep()
-
-  // Verify that the cached file message was logged
-  expect(consoleSpy).toHaveBeenCalledWith(
+  expect(infoSpy).toHaveBeenCalledWith(
     expect.stringContaining('has been cached'),
   )
-
-  // Verify that tar extraction was still called
   expect(mockExeca).toHaveBeenCalledWith('tar', [
     'xvf',
-    expect.stringContaining(
-      '/mock/cache/vscode-ripgrep/ripgrep-v13.0.0-10-x86_64-unknown-linux-musl.tar.gz',
-    ),
+    cachedFile,
     '-C',
-    expect.stringContaining('/bin'),
+    tempBinDir,
   ])
 
-  consoleSpy.mockRestore()
+  infoSpy.mockRestore()
 })
 
 test('downloadFile should handle download errors', async () => {
-  // Mock GitHub API to return 404 error
+  // Make the stream fail to ensure pipeline rejects
   nock('https://github.com')
     .get(
       '/microsoft/ripgrep-prebuilt/releases/download/v13.0.0-10/ripgrep-v13.0.0-10-x86_64-unknown-linux-musl.tar.gz',
     )
-    .reply(404, 'Not Found')
-
-  // Mock file system operations
-  mockTemporaryFile.mockReturnValue('/tmp/mock-temp-file')
+    .replyWithError('simulated error')
 
   await expect(
     downloadFile(
       'https://github.com/microsoft/ripgrep-prebuilt/releases/download/v13.0.0-10/ripgrep-v13.0.0-10-x86_64-unknown-linux-musl.tar.gz',
-      '/tmp/test.tar.gz',
+      join(tmpdir(), 'test.tar.gz'),
     ),
   ).rejects.toThrow('Failed to download')
 })
