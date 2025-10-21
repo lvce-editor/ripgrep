@@ -8,7 +8,6 @@ import { pipeline } from 'node:stream/promises'
 import { fileURLToPath } from 'node:url'
 import { pathExists } from 'path-exists'
 import { temporaryFile } from 'tempy'
-import { ProxyAgent } from 'undici'
 import { xdgCache } from 'xdg-basedir'
 
 const { mkdir, createWriteStream, move } = fsExtra
@@ -63,16 +62,7 @@ const getTarget = () => {
 export const downloadFile = async (url, outFile) => {
   try {
     const tmpFile = temporaryFile()
-
-    // Check for proxy environment variables
-    const proxy =
-      process.env.HTTPS_PROXY ||
-      process.env.HTTP_PROXY ||
-      process.env.https_proxy ||
-      process.env.http_proxy
-    const fetchOptions = proxy ? { dispatcher: new ProxyAgent(proxy) } : {}
-
-    const response = await fetch(url, fetchOptions)
+    const response = await fetch(url)
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`)
     }
