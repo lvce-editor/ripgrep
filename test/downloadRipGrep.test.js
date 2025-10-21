@@ -130,5 +130,7 @@ test('downloadFile should handle download errors', async () => {
       'https://github.com/microsoft/ripgrep-prebuilt/releases/download/v13.0.0-10/ripgrep-v13.0.0-10-x86_64-unknown-linux-musl.tar.gz',
       join(tmpdir(), 'test.tar.gz'),
     ),
-  ).rejects.toThrow('Failed to download')
+  ).rejects.toThrow(
+    `Failed to download \"https://github.com/microsoft/ripgrep-prebuilt/releases/download/v13.0.0-10/ripgrep-v13.0.0-10-x86_64-unknown-linux-musl.tar.gz\": RequestError: simulated error`,
+  )
 })
