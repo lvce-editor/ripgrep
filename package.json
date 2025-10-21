@@ -10,6 +10,7 @@
     "url": "https://github.com/lvce-editor/ripgrep"
   },
   "scripts": {
+    "build": "node scripts/build.js",
     "postinstall": "node ./src/postinstall.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
@@ -32,14 +33,15 @@
     "xdg-basedir": "^5.1.0"
   },
   "devDependencies": {
-    "@lvce-editor/eslint-config": "^1.64.0",
+    "@lvce-editor/eslint-config": "^1.69.0",
     "@types/fs-extra": "^11.0.4",
     "@types/jest": "^30.0.0",
-    "@types/node": "^24.5.2",
-    "eslint": "^9.36.0",
-    "jest": "^30.1.3",
+    "@types/node": "^24.9.1",
+    "eslint": "^9.38.0",
+    "jest": "^30.2.0",
+    "nock": "^14.0.10",
     "prettier": "^3.6.2",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.3"
   },
   "prettier": {
     "semi": false,
