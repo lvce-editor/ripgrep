@@ -13,17 +13,13 @@ $ npm install @lvce-editor/ripgrep
 ## Usage
 
 ```js
-import { rgPath } from "@lvce-editor/ripgrep"
+import { rgPath } from '@lvce-editor/ripgrep'
 import { spawn } from 'node:child_process'
 
-const childProcess = spawn(rgPath, ["abc", "."], {
-  stdio: "inherit",
-});
+const childProcess = spawn(rgPath, ['abc', '.'], {
+  stdio: 'inherit',
+})
 ```
-
-## Gitpod
-
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io#https://github.com/lvce-editor/ripgrep)
 
 ## Credits
 
