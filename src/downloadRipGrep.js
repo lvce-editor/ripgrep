@@ -66,7 +66,6 @@ export const downloadFile = async (url, outFile) => {
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`)
     }
-
     await pipeline(response.body, createWriteStream(tmpFile))
     await mkdir(dirname(outFile), { recursive: true })
     await move(tmpFile, outFile)
