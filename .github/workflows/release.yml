@@ -77,8 +77,6 @@ jobs:
       - run: npm publish --access public
         if: matrix.os == 'ubuntu-24.04'
         working-directory: ./dist
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
       - name: Publish GitHub release
         if: matrix.os == 'ubuntu-24.04'
         env:
