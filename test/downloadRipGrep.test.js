@@ -27,6 +27,7 @@ jest.unstable_mockModule('xdg-basedir', () => ({
 }))
 
 // Mock only tar execution
+/** @type {any} */
 const mockExeca = jest.fn()
 jest.unstable_mockModule('execa', () => ({
   execa: mockExeca,
@@ -74,7 +75,7 @@ test('downloadRipGrep should successfully download and extract file', async () =
       'Content-Type': 'application/gzip',
     })
 
-  mockExeca.mockResolvedValue({ stdout: '', stderr: '' })
+  mockExeca.mockResolvedValue(/** @type {any} */ ({ stdout: '', stderr: '' }))
 
   await downloadRipGrep(tempBinDir)
 
@@ -99,7 +100,7 @@ test('downloadRipGrep should use cached file when it exists', async () => {
   )
   writeFileSync(cachedFile, 'already-downloaded')
 
-  mockExeca.mockResolvedValue({ stdout: '', stderr: '' })
+  mockExeca.mockResolvedValue(/** @type {any} */ ({ stdout: '', stderr: '' }))
   const infoSpy = jest.spyOn(console, 'info').mockImplementation(() => {})
 
   await downloadRipGrep(tempBinDir)
