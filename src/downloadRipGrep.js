@@ -15,7 +15,7 @@ const { mkdir, createWriteStream, move } = fsExtra
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
 const REPOSITORY = `microsoft/ripgrep-prebuilt`
-const VERSION = process.env.RIPGREP_VERSION || 'v13.0.0-10'
+const VERSION = process.env.RIPGREP_VERSION || 'v15.0.0'
 const BIN_PATH = join(__dirname, '../bin')
 
 const getTarget = () => {
@@ -123,7 +123,9 @@ export const downloadRipGrep = async (overrideBinPath) => {
     }
   }
   const target = getTarget()
-  const baseUrl = process.env.RIPGREP_PREBUILT_BINARIES_MIRROR || `https://github.com/${REPOSITORY}/releases/download`
+  const baseUrl =
+    process.env.RIPGREP_PREBUILT_BINARIES_MIRROR ||
+    `https://github.com/${REPOSITORY}/releases/download`
   const url = `${baseUrl}/${VERSION}/ripgrep-${VERSION}-${target}`
   const downloadPath = `${xdgCache}/vscode-ripgrep/ripgrep-${VERSION}-${target}`
   const binPath = overrideBinPath ?? BIN_PATH

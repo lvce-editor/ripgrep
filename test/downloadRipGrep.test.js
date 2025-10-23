@@ -56,7 +56,7 @@ test('downloadRipGrep should handle network error', async () => {
   // Simulate a network failure so pipeline rejects
   nock('https://github.com')
     .get(
-      '/microsoft/ripgrep-prebuilt/releases/download/v13.0.0-10/ripgrep-v13.0.0-10-x86_64-unknown-linux-musl.tar.gz',
+      '/microsoft/ripgrep-prebuilt/releases/download/v15.0.0/ripgrep-v15.0.0-x86_64-unknown-linux-musl.tar.gz',
     )
     .replyWithError('simulated error')
 
@@ -69,7 +69,7 @@ test('downloadRipGrep should successfully download and extract file', async () =
   // Intercept the GitHub asset request with a simple 200 body
   const scope = nock('https://github.com')
     .get(
-      '/microsoft/ripgrep-prebuilt/releases/download/v13.0.0-10/ripgrep-v13.0.0-10-x86_64-unknown-linux-musl.tar.gz',
+      '/microsoft/ripgrep-prebuilt/releases/download/v15.0.0/ripgrep-v15.0.0-x86_64-unknown-linux-musl.tar.gz',
     )
     .reply(200, 'mock-tar-gz-content', {
       'Content-Type': 'application/gzip',
@@ -86,7 +86,7 @@ test('downloadRipGrep should successfully download and extract file', async () =
   expect(tarArgs[0]).toBe('xvf')
   expect(normalize(tarArgs[1])).toContain(
     normalize(
-      `${tempCacheDir}/vscode-ripgrep/ripgrep-v13.0.0-10-x86_64-unknown-linux-musl.tar.gz`,
+      `${tempCacheDir}/vscode-ripgrep/ripgrep-v15.0.0-x86_64-unknown-linux-musl.tar.gz`,
     ),
   )
   expect(tarArgs[2]).toBe('-C')
@@ -99,7 +99,7 @@ test('downloadRipGrep should use cached file when it exists', async () => {
   mkdirSync(cachedDir, { recursive: true })
   const cachedFile = join(
     cachedDir,
-    'ripgrep-v13.0.0-10-x86_64-unknown-linux-musl.tar.gz',
+    'ripgrep-v15.0.0-x86_64-unknown-linux-musl.tar.gz',
   )
   writeFileSync(cachedFile, 'already-downloaded')
 
@@ -126,16 +126,16 @@ test('downloadFile should handle download errors', async () => {
   // Make the stream fail to ensure pipeline rejects
   nock('https://github.com')
     .get(
-      '/microsoft/ripgrep-prebuilt/releases/download/v13.0.0-10/ripgrep-v13.0.0-10-x86_64-unknown-linux-musl.tar.gz',
+      '/microsoft/ripgrep-prebuilt/releases/download/v15.0.0/ripgrep-v15.0.0-x86_64-unknown-linux-musl.tar.gz',
     )
     .replyWithError('simulated error')
 
   await expect(
     downloadFile(
-      'https://github.com/microsoft/ripgrep-prebuilt/releases/download/v13.0.0-10/ripgrep-v13.0.0-10-x86_64-unknown-linux-musl.tar.gz',
+      'https://github.com/microsoft/ripgrep-prebuilt/releases/download/v15.0.0/ripgrep-v15.0.0-x86_64-unknown-linux-musl.tar.gz',
       join(tmpdir(), 'test.tar.gz'),
     ),
   ).rejects.toThrow(
-    `Failed to download \"https://github.com/microsoft/ripgrep-prebuilt/releases/download/v13.0.0-10/ripgrep-v13.0.0-10-x86_64-unknown-linux-musl.tar.gz\": simulated error`,
+    `Failed to download \"https://github.com/microsoft/ripgrep-prebuilt/releases/download/v15.0.0/ripgrep-v15.0.0-x86_64-unknown-linux-musl.tar.gz\": simulated error`,
   )
 })
