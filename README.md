@@ -6,7 +6,7 @@ Same as [vscode-ripgrep](https://github.com/microsoft/vscode-ripgrep), but fixes
 
 ## Install
 
-```
+```sh
 $ npm install @lvce-editor/ripgrep
 ```
 
