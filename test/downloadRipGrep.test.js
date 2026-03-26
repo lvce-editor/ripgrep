@@ -15,11 +15,14 @@ const { tmpdir } = await import('node:os')
 
 const tempCacheDir = mkdtempSync(join(tmpdir(), 'ripgrep-test-'))
 const tempBinDir = mkdtempSync(join(tmpdir(), 'ripgrep-bin-'))
+const testVersion = 'v15.0.0'
+const linuxTarget = 'x86_64-unknown-linux-musl.tar.gz'
 
 // Force predictable platform/arch for URL/target without mocking core 'os'
 const originalEnv = { ...process.env }
 process.env.platform = 'linux'
 process.env.npm_config_arch = 'x64'
+process.env.RIPGREP_VERSION = testVersion
 
 // Provide cache location used by the implementation
 jest.unstable_mockModule('xdg-basedir', () => ({
@@ -34,9 +37,8 @@ jest.unstable_mockModule('execa', () => ({
 }))
 
 // Import after mocks
-const { downloadRipGrep, downloadFile } = await import(
-  '../src/downloadRipGrep.js'
-)
+const { downloadRipGrep, downloadFile } =
+  await import('../src/downloadRipGrep.js')
 
 beforeAll(() => {
   nock.disableNetConnect()
@@ -56,7 +58,7 @@ test('downloadRipGrep should handle network error', async () => {
   // Simulate a network failure so pipeline rejects
   nock('https://github.com')
     .get(
-      '/microsoft/ripgrep-prebuilt/releases/download/v15.0.0/ripgrep-v15.0.0-x86_64-unknown-linux-musl.tar.gz',
+      `/microsoft/ripgrep-prebuilt/releases/download/${testVersion}/ripgrep-${testVersion}-${linuxTarget}`,
     )
     .replyWithError('simulated error')
 
@@ -69,7 +71,7 @@ test('downloadRipGrep should successfully download and extract file', async () =
   // Intercept the GitHub asset request with a simple 200 body
   const scope = nock('https://github.com')
     .get(
-      '/microsoft/ripgrep-prebuilt/releases/download/v15.0.0/ripgrep-v15.0.0-x86_64-unknown-linux-musl.tar.gz',
+      `/microsoft/ripgrep-prebuilt/releases/download/${testVersion}/ripgrep-${testVersion}-${linuxTarget}`,
     )
     .reply(200, 'mock-tar-gz-content', {
       'Content-Type': 'application/gzip',
@@ -86,7 +88,7 @@ test('downloadRipGrep should successfully download and extract file', async () =
   expect(tarArgs[0]).toBe('xvf')
   expect(normalize(tarArgs[1])).toContain(
     normalize(
-      `${tempCacheDir}/vscode-ripgrep/ripgrep-v15.0.0-x86_64-unknown-linux-musl.tar.gz`,
+      `${tempCacheDir}/vscode-ripgrep/ripgrep-${testVersion}-${linuxTarget}`,
     ),
   )
   expect(tarArgs[2]).toBe('-C')
@@ -97,10 +99,7 @@ test('downloadRipGrep should use cached file when it exists', async () => {
   // Prepare a cached file on disk
   const cachedDir = join(tempCacheDir, 'vscode-ripgrep')
   mkdirSync(cachedDir, { recursive: true })
-  const cachedFile = join(
-    cachedDir,
-    'ripgrep-v15.0.0-x86_64-unknown-linux-musl.tar.gz',
-  )
+  const cachedFile = join(cachedDir, `ripgrep-${testVersion}-${linuxTarget}`)
   writeFileSync(cachedFile, 'already-downloaded')
 
   mockExeca.mockResolvedValue(/** @type {any} */ ({ stdout: '', stderr: '' }))
@@ -126,16 +125,16 @@ test('downloadFile should handle download errors', async () => {
   // Make the stream fail to ensure pipeline rejects
   nock('https://github.com')
     .get(
-      '/microsoft/ripgrep-prebuilt/releases/download/v15.0.0/ripgrep-v15.0.0-x86_64-unknown-linux-musl.tar.gz',
+      `/microsoft/ripgrep-prebuilt/releases/download/${testVersion}/ripgrep-${testVersion}-${linuxTarget}`,
     )
     .replyWithError('simulated error')
 
   await expect(
     downloadFile(
-      'https://github.com/microsoft/ripgrep-prebuilt/releases/download/v15.0.0/ripgrep-v15.0.0-x86_64-unknown-linux-musl.tar.gz',
+      `https://github.com/microsoft/ripgrep-prebuilt/releases/download/${testVersion}/ripgrep-${testVersion}-${linuxTarget}`,
       join(tmpdir(), 'test.tar.gz'),
     ),
   ).rejects.toThrow(
-    `Failed to download \"https://github.com/microsoft/ripgrep-prebuilt/releases/download/v15.0.0/ripgrep-v15.0.0-x86_64-unknown-linux-musl.tar.gz\": simulated error`,
+    `Failed to download \"https://github.com/microsoft/ripgrep-prebuilt/releases/download/${testVersion}/ripgrep-${testVersion}-${linuxTarget}\": simulated error`,
   )
 })
