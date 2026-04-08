@@ -11,10 +11,10 @@
   },
   "scripts": {
     "build": "node scripts/build.js",
+    "format": "prettier --write .",
     "postinstall": "node ./src/postinstall.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
-    "format": "prettier --write ."
+    "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch"
   },
   "keywords": [
     "lvce-editor",

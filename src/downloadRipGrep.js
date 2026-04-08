@@ -15,7 +15,7 @@ const { mkdir, createWriteStream, move } = fsExtra
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
 const REPOSITORY = `microsoft/ripgrep-prebuilt`
-const VERSION = process.env.RIPGREP_VERSION || 'v15.0.0'
+const VERSION = process.env.RIPGREP_VERSION || 'v15.0.1'
 const BIN_PATH = join(__dirname, '../bin')
 
 const getTarget = () => {
