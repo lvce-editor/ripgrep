@@ -76,9 +76,6 @@ jobs:
         if: steps.npm-cache.outputs.cache-hit != 'true'
         env:
           XDG_CACHE_HOME: .cache
-      - run: npm run postinstall
-        env:
-          XDG_CACHE_HOME: .cache
       - run: npm test
       - run: node scripts/build.js
       - run: npm publish --access public
