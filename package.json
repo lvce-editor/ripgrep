@@ -22,7 +22,7 @@
   "author": "Lvce Editor",
   "license": "MIT",
   "dependencies": {
-    "@vscode/ripgrep": "^1.18.0"
+    "@vscode/ripgrep": "1.18.0"
   },
   "devDependencies": {
     "@lvce-editor/eslint-config": "^11.2.0",
