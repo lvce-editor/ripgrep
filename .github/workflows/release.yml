@@ -58,14 +58,14 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
       - name: Cache ripgrep binary
         id: cache-ripgrep
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         env:
           cache-name: cache-ripgrep
         with:
           path: |
             .cache
           key: ${{ runner.os }}-build-${{ env.cache-name }}
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         id: npm-cache
         with:
           path: '**/node_modules'
