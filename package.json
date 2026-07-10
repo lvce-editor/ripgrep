@@ -25,10 +25,10 @@
     "@vscode/ripgrep": "1.18.0"
   },
   "devDependencies": {
-    "@lvce-editor/eslint-config": "^12.0.0",
+    "@lvce-editor/eslint-config": "^16.3.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^25.9.3",
-    "eslint": "^10.5.0",
+    "eslint": "^10.7.0",
     "execa": "^9.6.1",
     "jest": "^30.4.2",
     "prettier": "^3.8.4",
