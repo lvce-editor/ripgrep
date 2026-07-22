@@ -25,7 +25,7 @@
     "@vscode/ripgrep": "1.18.0"
   },
   "devDependencies": {
-    "@lvce-editor/eslint-config": "^16.4.0",
+    "@lvce-editor/eslint-config": "^17.1.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^25.9.3",
     "eslint": "^10.7.0",
